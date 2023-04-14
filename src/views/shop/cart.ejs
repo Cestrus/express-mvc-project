@@ -1,0 +1,46 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
+    </head>
+
+    <body style="width: 100vw; height: 100vh;; display: flex; flex-direction:column; justify-content: space-between;">
+        <%- include('../includes/navigation.ejs') %>
+		
+		<main style="overflow-y: auto;">
+			<% if (productsData.length > 0) { %>
+				<div class="grid">
+					<% for (let prodData of productsData) { %>
+						
+							<article class="card product-item">
+								<header class="card__header">
+									<h1 class="product__title"><%= prodData.product.title %></h1>
+								</header>
+								<div class="card__image">
+									<img src="<%= prodData.product.imageUrl %>" alt="A Book">
+								</div>
+								<div class="card__content">
+									<h2 class="product__price">$<%= prodData.product.price %></h2>									
+									<p class="product__description"><%= prodData.product.description %></p>
+								</div>
+								<div class="card__actions">
+									<a href="/product/<%= prodData.product.id %>" class="btn">Details</a>
+									<form action="/cart/remove-product?remove=true" method="post">
+										<input type="hidden" name="id" value="<%= prodData.product.id %>">
+										<input type="hidden" name="price" value="<%= prodData.product.price %>">
+										<button class="btn" type="submit">Delete</button>
+									</form>
+								</div>
+								<p class="product__price">Quantity: <%=prodData.quantity %></p>
+							</article>
+                        
+                    <% } %>
+					</div>
+
+            <% } else { %>
+                <h1>No Products in Cart!</h1>
+            <% } %>
+        </main>
+
+		<footer style="border-top: 2px solid black;">
+			<h2>Total Price: <%= totalPrice %></h2>
+		</footer>
+        <%- include('../includes/end.ejs') %>
