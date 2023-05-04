@@ -1,7 +1,30 @@
 <%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/product.css">
     </head>
 
-    <body>
+    <body >
         <%- include('../includes/navigation.ejs') %>
-		<h1>Nothing there</h1>
+		<main style="overflow-y: auto;">
+			<% if (orders.length > 0) { %>
+				<ul>
+					<% orders.forEach(order => {%>
+						<li>
+							<h1># <%= order.id %></h1>
+							<ul>
+								<% order.products.forEach(product => { %>
+									<li>
+										<%= product.title %> (<%= product.orderItem.quantity %>)
+									</li>
+								<% }); %>	
+							</ul>
+						</li>
+					<% }); %>	
+				</ul>
+
+
+
+			<% } else { %>
+				<h1>Nothing there</h1>                
+            <% } %>
+        </main>
         <%- include('../includes/end.ejs') %>

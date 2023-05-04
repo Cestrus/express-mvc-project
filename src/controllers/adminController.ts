@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { Product } from "../models/productModel";
-import { CartModel } from "../models/cartModel";
+import Product from "../models/productModel";
+import Cart from "../models/cartModel";
 
 const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
     res.render("admin/edit-product", {
@@ -16,14 +16,19 @@ const postAddProduct = async (
     next: NextFunction
 ) => {
     const { id, title, price, imageUrl, description } = req.body;
-    const product = new Product(
-        id,
-        title,
-        Number(price),
-        description,
-        imageUrl
-    );
-    await product.save(id);
+    if (!id) {
+        await req.user.createProduct({
+            title,
+            price,
+            imageUrl,
+            description,
+        });
+    } else {
+        await Product.update(
+            { title, price, imageUrl, description },
+            { where: { id: id } }
+        );
+    }
     res.redirect("/admin/products");
 };
 
@@ -34,7 +39,7 @@ const getEditProduct = async (
 ) => {
     const { editMode } = req.query;
     const { id } = req.params;
-    const product = await Product.getProductById(id);
+    const product = await req.user.getProducts({ where: { id: id } });
     if (!editMode || !product) {
         return res.redirect("/");
     }
@@ -42,7 +47,7 @@ const getEditProduct = async (
         pageTitle: "Edit Product",
         path: "/admin/add-product",
         editing: editMode,
-        product,
+        product: product[0],
     });
 };
 
@@ -51,15 +56,13 @@ const postDeleteProduct = async (
     res: Response,
     next: NextFunction
 ) => {
-    const cart = await CartModel.getCart();
     const { id, price } = req.body;
-    await Product.removeProduct(id);
-    await cart.removeProduct(id, Number(price));
+    await Product.destroy({ where: { id: id } });
     res.redirect(`/admin/products`);
 };
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.fetchAll();
+    const products = await Product.findAll({ where: { userId: req.user.id } });
     res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
