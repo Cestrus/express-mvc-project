@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Product } from "../models/productModel";
-import { CartModel } from "../models/cartModel";
+// import { CartModel } from "../models/cartModel";
 
 const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
     res.render("admin/edit-product", {
@@ -16,14 +16,12 @@ const postAddProduct = async (
     next: NextFunction
 ) => {
     const { id, title, price, imageUrl, description } = req.body;
-    const product = new Product(
-        id,
-        title,
-        Number(price),
-        description,
-        imageUrl
-    );
-    await product.save(id);
+    const product = new Product(title, Number(price), description, imageUrl);
+    if (id) {
+        await product.update(id);
+    } else {
+        await product.save();
+    }
     res.redirect("/admin/products");
 };
 
@@ -34,7 +32,7 @@ const getEditProduct = async (
 ) => {
     const { editMode } = req.query;
     const { id } = req.params;
-    const product = await Product.getProductById(id);
+    const product = await Product.fetchOne(id);
     if (!editMode || !product) {
         return res.redirect("/");
     }
@@ -51,11 +49,9 @@ const postDeleteProduct = async (
     res: Response,
     next: NextFunction
 ) => {
-    const cart = await CartModel.getCart();
     const { id, price } = req.body;
     await Product.removeProduct(id);
-    await cart.removeProduct(id, Number(price));
-    res.redirect(`/admin/products`);
+    res.redirect("/admin/products");
 };
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {

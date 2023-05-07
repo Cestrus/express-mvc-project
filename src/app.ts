@@ -5,8 +5,10 @@ import bodyParser from "body-parser";
 import adminRouter from "./routes/admin";
 import shopRouter from "./routes/shop";
 import errorController from "./controllers/errorController";
+import { mongoConnect } from "./util/database";
 
 const app = express();
+// const dbConnect = mongoConnect();
 
 app.set("view engine", "ejs");
 app.set("views", "src/views");
