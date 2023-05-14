@@ -17,6 +17,8 @@ shopRouter.post("/cart/remove-product", shopController.postCart);
 
 shopRouter.get("/orders", shopController.getOrders);
 
+shopRouter.post("/order-items", shopController.postOrder);
+
 shopRouter.get("/checkout", shopController.getCheckout);
 
 export default shopRouter;

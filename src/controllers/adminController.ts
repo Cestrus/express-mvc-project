@@ -16,7 +16,13 @@ const postAddProduct = async (
     next: NextFunction
 ) => {
     const { id, title, price, imageUrl, description } = req.body;
-    const product = new Product(title, Number(price), description, imageUrl);
+    const product = new Product(
+        title,
+        Number(price),
+        description,
+        imageUrl,
+        req.user._id
+    );
     if (id) {
         await product.update(id);
     } else {

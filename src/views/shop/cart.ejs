@@ -6,41 +6,41 @@
         <%- include('../includes/navigation.ejs') %>
 		
 		<main style="overflow-y: auto;">
-			<% if (productsData.length > 0) { %>
+			<% if (products.length > 0) { %>
 				<div class="grid">
-					<% for (let prodData of productsData) { %>
-						
-							<article class="card product-item">
-								<header class="card__header">
-									<h1 class="product__title"><%= prodData.product.title %></h1>
-								</header>
-								<div class="card__image">
-									<img src="<%= prodData.product.imageUrl %>" alt="A Book">
-								</div>
-								<div class="card__content">
-									<h2 class="product__price">$<%= prodData.product.price %></h2>									
-									<p class="product__description"><%= prodData.product.description %></p>
-								</div>
-								<div class="card__actions">
-									<a href="/product/<%= prodData.product.id %>" class="btn">Details</a>
-									<form action="/cart/remove-product?remove=true" method="post">
-										<input type="hidden" name="id" value="<%= prodData.product.id %>">
-										<input type="hidden" name="price" value="<%= prodData.product.price %>">
-										<button class="btn" type="submit">Delete</button>
-									</form>
-								</div>
-								<p class="product__price">Quantity: <%=prodData.quantity %></p>
-							</article>
-                        
+					<% for (let product of products) { %>						
+						<article class="card product-item">
+							<header class="card__header">
+								<h1 class="product__title"><%= product.title %></h1>
+							</header>
+							<div class="card__image">
+								<img src="<%= product.imageUrl %>" alt="A Book">
+							</div>
+							<div class="card__content">
+								<h2 class="product__price">$<%= product.price %></h2>									
+								<p class="product__description"><%= product.description %></p>
+							</div>
+							<div class="card__actions">
+								<a href="/product/<%= product._id %>" class="btn">Details</a>
+								<form action="/cart/remove-product?remove=true" method="post">
+									<input type="hidden" name="productId" value="<%= product._id %>">
+									<input type="hidden" name="price" value="<%= product.price %>">
+									<button class="btn" type="submit">Remove</button>
+								</form>
+							</div>
+							<p class="product__price">Quantity: <%=product.quantity %></p>
+						</article>                        
                     <% } %>
-					</div>
-
+				</div>
             <% } else { %>
                 <h1>No Products in Cart!</h1>
             <% } %>
         </main>
-
-		<footer style="border-top: 2px solid black;">
-			<h2>Total Price: <%= totalPrice %></h2>
+		<% if (products.length > 0) { %>
+		<footer style="height: 100px; display: flex; justify-content: center">
+			<form action="/order-items" method="post">
+				<button class="btn" type="submit">Order items</button>
+			</form>
 		</footer>
+		<% } %>
         <%- include('../includes/end.ejs') %>

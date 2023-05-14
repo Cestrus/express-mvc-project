@@ -1,7 +1,25 @@
 <%- include('../includes/head.ejs') %>
+     <link rel="stylesheet" href="/css/orders.css">
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
-		<h1>Nothing there</h1>
-        <%- include('../includes/end.ejs') %>
+		<main style="overflow-y: auto;">
+			<% if(orders.length > 0) {%>
+				<ul class="orders">
+					<% for (let order of orders){ %>
+						<li class="orders__item">
+							<h1>Order # - <%= order._id%> </h2>
+							<ul class="orders__products">
+								<% for (let prod of order.products){ %>
+									<li class="orders__products-item"><%= prod.id%> (<%= prod.quantity%>)</li>
+								<% } %>
+							</ul>
+						</li>
+					<% } %>
+				</ul>
+		</main>
+		<%} else {%>
+			<h1>Nothing there</h1>
+        <% } %>
+		<%- include('../includes/end.ejs') %>

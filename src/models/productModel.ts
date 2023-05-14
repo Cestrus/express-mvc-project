@@ -6,7 +6,8 @@ export class Product {
         public title: string,
         public price: number,
         public description: string,
-        public imageUrl: string
+        public imageUrl: string,
+        public userId: string
     ) {}
 
     private static async getCollection() {
@@ -35,6 +36,19 @@ export class Product {
         const product = await collection.findOne({ _id: new ObjectId(id) });
         await close();
         return product;
+    }
+
+    static async fetchProducts(prodIdArr: string[]) {
+        if (!prodIdArr.length) {
+            return [];
+        }
+        const formatArr = prodIdArr.map((prodId) => new ObjectId(prodId));
+        const { collection, close } = await Product.getCollection();
+        const products = await collection
+            .find({ _id: { $in: [...formatArr] } })
+            .toArray();
+        await close();
+        return products;
     }
 
     static async removeProduct(id: string) {
