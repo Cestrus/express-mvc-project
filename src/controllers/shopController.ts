@@ -1,12 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { Product } from "../models/productModel";
-import { User } from "../models/userModel";
-import { IUser, prodCartType } from "../types/user.interface";
-import { Order } from "../models/orderModel";
-// import { CartModel } from "../models/cartModel";
+import Product from "../models/productModel";
+import Order from "../models/orderModel";
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.fetchAll();
+    const products = await Product.find();
     res.render("shop/product-list", {
         prods: products,
         pageTitle: "All Products",
@@ -16,7 +13,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
 
 const getProduct = async (req: Request, res: Response, next: NextFunction) => {
     const prodId = req.params.id;
-    const product = await Product.fetchOne(prodId);
+    const product = await Product.findOne({ _id: prodId });
     res.render("shop/product-detail", {
         product: product,
         pageTitle: "Product Detail",
@@ -25,7 +22,7 @@ const getProduct = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getIndex = async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.fetchAll();
+    const products = await Product.find();
     res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
@@ -34,13 +31,13 @@ const getIndex = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getCart = async (req: Request, res: Response, next: NextFunction) => {
-    const prodIdInCart: prodCartType[] = req.user.cart.items;
-    const products = await User.getCart(prodIdInCart);
+    await req.user.populate("cart.items.productId");
+    const products = req.user.cart.items;
     res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Cart",
         products,
-        totalPrice: "None",
+        // totalPrice: "None",
     });
 };
 
@@ -48,16 +45,15 @@ const postCart = async (req: Request, res: Response, next: NextFunction) => {
     const { remove } = req.query;
     const { productId, price } = req.body;
     if (remove === "true") {
-        await User.removeProduct(productId, Number(price), req.user as IUser);
+        await req.user.removeProduct(productId);
     } else {
-        await User.addToCart(req.user as IUser, productId);
+        await req.user.addToCart(productId);
     }
     res.redirect("/cart");
 };
 
 const getOrders = async (req: Request, res: Response, next: NextFunction) => {
-    const orders = await Order.getOrders(req.user._id);
-    console.log("===> ", orders);
+    const orders = (await Order.find({ userId: req.user._id })) || [];
 
     res.render("shop/orders", {
         path: "/orders",
@@ -67,17 +63,13 @@ const getOrders = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const postOrder = async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user as IUser;
-    await Order.addOrder(user);
-    await User.setEmptyCart(user._id);
-    res.redirect("/orders");
-};
-
-const getCheckout = (req: Request, res: Response, next: NextFunction) => {
-    res.render("shop/checkout", {
-        path: "/checkout",
-        pageTitle: "Checkout",
+    const order = new Order({
+        userId: req.user._id,
+        products: [...req.user.cart.items],
     });
+    order.save();
+    req.user.clearCart();
+    res.redirect("/orders");
 };
 
 export default {
@@ -88,5 +80,4 @@ export default {
     postCart,
     getOrders,
     postOrder,
-    getCheckout,
 };

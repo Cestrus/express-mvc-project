@@ -9,10 +9,10 @@ adminRouter.get("/add-product", adminController.getAddProduct);
 // /admin/add-product => POST
 adminRouter.post("/add-product", adminController.postAddProduct);
 
-// /admin/edit-product => POST
+// // /admin/edit-product => POST
 adminRouter.post("/edit-product/", adminController.postAddProduct);
 
-// /admin/edit-product => GET
+// // /admin/edit-product => GET
 adminRouter.get("/edit-product/:id", adminController.getEditProduct);
 
 adminRouter.post("/delete-product", adminController.postDeleteProduct);

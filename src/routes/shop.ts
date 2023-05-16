@@ -19,6 +19,6 @@ shopRouter.get("/orders", shopController.getOrders);
 
 shopRouter.post("/order-items", shopController.postOrder);
 
-shopRouter.get("/checkout", shopController.getCheckout);
+// shopRouter.get("/checkout", shopController.getCheckout);
 
 export default shopRouter;
