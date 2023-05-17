@@ -8,6 +8,7 @@ import adminRouter from "./routes/admin";
 import shopRouter from "./routes/shop";
 import errorController from "./controllers/errorController";
 import User from "./models/userModel";
+import authRouter from "./routes/auth";
 
 dotenv.config();
 const app = express();
@@ -26,6 +27,7 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
 
 app.use("/admin", adminRouter);
 app.use(shopRouter);
+app.use(authRouter);
 app.use(errorController.get404);
 
 mongoose.connect(process.env.URL, { dbName: "shop" }).then((result) => {
