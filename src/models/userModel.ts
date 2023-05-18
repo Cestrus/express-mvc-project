@@ -1,5 +1,5 @@
 import mongoose, { mongo } from "mongoose";
-import { IUser, prodCartType } from "../types/user.interface";
+import { prodCartType } from "../types/prodCart";
 
 const Schema = mongoose.Schema;
 const userSchema = new Schema({

@@ -2,10 +2,12 @@ import { Request, Response, NextFunction } from "express";
 import Product from "../models/productModel";
 
 const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
+    const isLoggedIn = req.session.isLoggedIn;
     res.render("admin/edit-product", {
         pageTitle: "Add Product",
         path: "/admin/add-product",
         editing: false,
+        isAuthenticated: isLoggedIn,
     });
 };
 
@@ -22,7 +24,7 @@ const postAddProduct = async (
         );
     } else {
         const product = new Product({
-            userId: req.user._id,
+            userId: req.session.user._id,
             title,
             price: Number(price),
             description,
@@ -44,11 +46,13 @@ const getEditProduct = async (
     if (!editMode || !product) {
         return res.redirect("/");
     }
+    const isLoggedIn = req.session.isLoggedIn;
     res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/add-product",
         editing: editMode,
         product,
+        isAuthenticated: isLoggedIn,
     });
 };
 
@@ -64,10 +68,12 @@ const postDeleteProduct = async (
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     const products = await Product.find();
+    const isLoggedIn = req.session.isLoggedIn;
     res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
         path: "/admin/products",
+        isAuthenticated: isLoggedIn,
     });
 };
 
