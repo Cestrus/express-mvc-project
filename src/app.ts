@@ -5,6 +5,8 @@ import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import session from "express-session";
 import connectMongoDB from "connect-mongodb-session";
+import csrf from "csurf";
+import flash from "connect-flash";
 
 import User from "./models/userModel";
 import adminRouter from "./routes/admin";
@@ -15,6 +17,7 @@ import authRouter from "./routes/auth";
 
 dotenv.config();
 const app = express();
+const csrfProtection = csrf();
 
 const MongoDbStore = connectMongoDB(session);
 const store = new MongoDbStore({
@@ -38,6 +41,9 @@ app.use(
     })
 );
 
+app.use(csrfProtection);
+app.use(flash());
+
 app.use(async (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.user) {
         next();
@@ -46,6 +52,12 @@ app.use(async (req: Request, res: Response, next: NextFunction) => {
         req.user = user;
         next();
     }
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
 });
 
 app.use("/admin", adminRouter);

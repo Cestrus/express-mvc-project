@@ -3,7 +3,7 @@ import { prodCartType } from "../types/prodCart";
 
 const Schema = mongoose.Schema;
 const userSchema = new Schema({
-    userName: {
+    password: {
         type: String,
         required: true,
     },

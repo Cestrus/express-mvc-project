@@ -26,6 +26,7 @@
 									<input type="hidden" name="productId" value="<%= product.productId._id %>">
 									<input type="hidden" name="price" value="<%= product.productId.price %>">
 									<button class="btn" type="submit">Remove</button>
+									<input type="hidden" value="<%= csrfToken %>" name="_csrf" />
 								</form>
 							</div>
 							<p class="product__price">Quantity: <%=product.quantity %></p>
@@ -40,6 +41,7 @@
 		<footer style="height: 100px; display: flex; justify-content: center">
 			<form action="/order-items" method="post">
 				<button class="btn" type="submit">Order items</button>
+				<input type="hidden" value="<%= csrfToken %>" name="_csrf" />
 			</form>
 		</footer>
 		<% } %>
