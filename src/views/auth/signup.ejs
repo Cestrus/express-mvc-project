@@ -7,8 +7,8 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-		<% if (errorMsg) { %>
-			<div class="user-message user-message--error"><%= errorMsg %></div>
+		<% if (messObj.message) { %>
+			<div class="user-message <% if(messObj.isError) { %> user-message--error <% } %>"><%= messObj.message %></div>
 		<% } %>
         <form class="login-form" action="/signup" method="POST">
             <div class="form-control">

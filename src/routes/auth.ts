@@ -13,4 +13,6 @@ authRouter.get("/signup", authController.getSignup);
 
 authRouter.post("/signup", authController.postSignup);
 
+authRouter.get("/confirm", authController.getConfirm);
+
 export default authRouter;
