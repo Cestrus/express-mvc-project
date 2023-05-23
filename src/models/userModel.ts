@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import { prodCartType } from "../types/prodCart";
 
 const Schema = mongoose.Schema;
@@ -23,6 +23,8 @@ const userSchema = new Schema({
             },
         ],
     },
+    resetToken: String,
+    ressetTokenExpiration: Date,
 });
 
 userSchema.methods.addToCart = async function (id: string) {

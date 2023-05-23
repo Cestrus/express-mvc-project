@@ -75,18 +75,17 @@ const getHtml = (emailType: ENVELOPE, token?: string): emailContentType => {
 };
 
 const createSignUpHtml = (token: string): emailContentType => {
-    console.log("token => ", token);
     return {
-        htmlContent: `<!DOCTYPE html><html><body><h1>Hello!</h1><p>May be you try signup to my SHOP!</p><div>For complate this action pleace click <a href="http://localhost:3000/login:${token}"> link </a></div></body></html>`,
-        subject: "Sign up to mySHOP",
+        htmlContent: `<!DOCTYPE html><html><body><h1>Hello!</h1><p>May be you try signup to my SHOP!</p><div>For complate this action pleace click <a href="http://localhost:3000/confirmSignup/${token}"> link </a></div></body></html>`,
+        subject: "Confirm sign up to mySHOP",
     };
 };
 
 const createConfirmHtml = (): emailContentType => {
     return {
         htmlContent:
-            "<!DOCTYPE html><html><body><h1>Congratulations!</h1><p>You signup to my SHOP!</p></body></html>",
-        subject: "Confirm sign up",
+            "<!DOCTYPE html><html><body><h1>Thank you!</h1><p>You signup to mySHOP!</p><div>Visit to <a href='http://localhost:3000/'>mySHOP</a></div></body></html>",
+        subject: "Congratulations!",
     };
 };
 

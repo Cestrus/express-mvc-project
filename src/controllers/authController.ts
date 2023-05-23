@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
+
 import User from "../models/userModel";
+import PossibleUser from "../models/possibleUserModel";
+import { sendEmail, ENVELOPE } from "../util/sib-api";
+import { getToken } from "../util/tokens";
 
 const getLogin = (req: Request, res: Response, next: NextFunction) => {
     const message = req.flash("errorLogin")[0];
@@ -39,11 +43,13 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getSignup = (req: Request, res: Response, next: NextFunction) => {
-    const message = req.flash("signupError")[0];
+    // const message = req.flash("signupError")[0];
+    const [messErr, isError] = req.flash("signupError");
+    const [messConfirm] = req.flash("confirmSignup");
     res.render("auth/signup", {
         pageTitle: "Signup Page",
         path: "/signup",
-        errorMsg: message,
+        messObj: { isError, message: messErr || messConfirm },
     });
 };
 
@@ -51,16 +57,41 @@ const postSignup = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, confirmPassword } = req.body;
     const isExistUser = await User.findOne({ email: email });
     if (isExistUser) {
-        req.flash("signupError", "User exist already");
+        req.flash("signupError", ["User exist already", "error"]);
         return res.redirect("/signup");
     }
+
+    const isExistPossibleUser = await PossibleUser.findOne({ email: email });
+    if (isExistPossibleUser) {
+        await PossibleUser.deleteOne({ email: email });
+    }
     const hashPassword = await bcrypt.hash(password, Number(process.env.SALT));
-    const user = new User({
+    const userToken = getToken();
+    const possibleUser = new PossibleUser({
         password: hashPassword,
         email,
-        cart: { items: [] },
+        userToken,
+        expireAt: new Date(),
     });
+    possibleUser.save();
+
+    sendEmail(email, ENVELOPE.signUp, userToken);
+    req.flash("confirmSignup", "Check your mail for confirm sign up");
+    res.redirect("/signup");
+};
+
+const getConfirmSignup = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const { userToken } = req.params;
+    const { password, email } = await PossibleUser.findOneAndDelete({
+        userToken: userToken,
+    });
+    const user = new User({ password, email, cart: { items: [] } });
     user.save();
+    sendEmail(email, ENVELOPE.confirmSignup);
     res.redirect("/login");
 };
 
@@ -70,4 +101,5 @@ export default {
     postLogout,
     getSignup,
     postSignup,
+    getConfirmSignup,
 };
