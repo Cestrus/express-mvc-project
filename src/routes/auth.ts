@@ -15,4 +15,8 @@ authRouter.post("/signup", authController.postSignup);
 
 authRouter.get("/confirmSignup/:userToken", authController.getConfirmSignup);
 
+authRouter.get("/reset", authController.getReset);
+
+authRouter.post("/reset", authController.postReset);
+
 export default authRouter;

@@ -43,7 +43,6 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getSignup = (req: Request, res: Response, next: NextFunction) => {
-    // const message = req.flash("signupError")[0];
     const [messErr, isError] = req.flash("signupError");
     const [messConfirm] = req.flash("confirmSignup");
     res.render("auth/signup", {
@@ -95,6 +94,15 @@ const getConfirmSignup = async (
     res.redirect("/login");
 };
 
+const getReset = async (req: Request, res: Response, next: NextFunction) => {
+    res.render("auth/reset", {
+        pageTitle: "Reset password",
+        path: "/reset",
+    });
+};
+
+const postReset = async (req: Request, res: Response, next: NextFunction) => {};
+
 export default {
     getLogin,
     postLogin,
@@ -102,4 +110,6 @@ export default {
     getSignup,
     postSignup,
     getConfirmSignup,
+    getReset,
+    postReset,
 };
