@@ -11,9 +11,8 @@ import flash from "connect-flash";
 import User from "./models/userModel";
 import adminRouter from "./routes/admin";
 import shopRouter from "./routes/shop";
-import errorController from "./controllers/errorController";
-
 import authRouter from "./routes/auth";
+import errorController from "./controllers/errorController";
 
 dotenv.config();
 const app = express();

@@ -33,6 +33,7 @@
         "express": "^4.16.3",
         "express-session": "^1.17.3",
         "mongodb": "^5.4.0",
-        "mongoose": "^7.1.1"
+        "mongoose": "^7.1.1",
+        "sib-api-v3-sdk": "^8.5.0"
     }
 }
