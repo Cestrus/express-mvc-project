@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
 import User from "../models/userModel";
 import { mailer, mailConstructor } from "../util/mailer";
 
@@ -41,7 +43,6 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getSignup = (req: Request, res: Response, next: NextFunction) => {
-    // console.log(req.flash("signupError"));
     const [messErr, isError] = req.flash("signupError");
     const [messConfirm] = req.flash("confirmSignup");
     res.render("auth/signup", {
@@ -71,9 +72,18 @@ const postSignup = async (req: Request, res: Response, next: NextFunction) => {
     res.redirect("/signup");
 };
 
-const getConfirm = async (req: Request, res: Response, next: NextFunction) => {
+const getConfirm = (req: Request, res: Response, next: NextFunction) => {
     res.redirect("/login");
 };
+
+const getReset = async (req: Request, res: Response, next: NextFunction) => {
+    res.render("auth/reset", {
+        pageTitle: "Reset password",
+        path: "/reset",
+    });
+};
+
+const postReset = async (req: Request, res: Response, next: NextFunction) => {};
 
 export default {
     getLogin,
@@ -82,4 +92,6 @@ export default {
     getSignup,
     postSignup,
     getConfirm,
+    getReset,
+    postReset,
 };
