@@ -7,16 +7,19 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
+		<% if (messObj.message) { %>
+			<div class="user-message <% if(messObj.isError) { %> user-message--error <% } %>"><%= messObj.message %></div>
+		<% } %>
         <form class="login-form" 
 				action="/reset" 
 				method="POST"
 		>
             <div class="form-control">
-                <label for="password">New Password</label>
-                <input type="password" name="password" id="password">
+                <label for="email">E-Mail</label>
+                <input type="email" name="email" id="email">
             </div>
 			<input type="hidden" value="<%= csrfToken %>" name="_csrf" />
-            <button class="btn" type="submit">Reset</button>
+            <button class="btn" type="submit">Reset password</button>
         </form>
     </main>
 <%- include('../includes/end.ejs') %>

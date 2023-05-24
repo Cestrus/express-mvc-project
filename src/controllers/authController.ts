@@ -95,13 +95,76 @@ const getConfirmSignup = async (
 };
 
 const getReset = async (req: Request, res: Response, next: NextFunction) => {
+    let [errorNotUser, errInvalidToken, isError] = req.flash("errorReset");
+    const [confirmEmail] = req.flash("confirmEmail");
     res.render("auth/reset", {
         pageTitle: "Reset password",
         path: "/reset",
+        messObj: {
+            isError,
+            message: errorNotUser || errInvalidToken || confirmEmail,
+        },
     });
 };
 
-const postReset = async (req: Request, res: Response, next: NextFunction) => {};
+const postReset = async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+        req.flash("errorReset", ["Not found e-mail", "", "error"]);
+        return res.redirect("/reset");
+    }
+    const resetToken = getToken();
+    user.resetToken = resetToken;
+    user.resetTokenExpiration = new Date(Date.now() + 600000);
+    user.save();
+    req.flash("confirmEmail", "Check your email and confirm reset password");
+    sendEmail(email, ENVELOPE.changePass, resetToken);
+    res.redirect("/reset");
+};
+
+const getChangePassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const [errConfirmPass] = req.flash("errConfirmPass");
+    const [passwordChangeSuccess] = req.flash("passwordChangeSuccess");
+    const { resetToken } = req.params;
+    const user = await User.findOne({
+        resetToken: resetToken,
+        resetTokenExpiration: { $gt: Date.now() },
+    });
+    if (!user) {
+        req.flash("errorReset", ["", "Invalid Token!", "error"]);
+        return res.redirect("/reset");
+    }
+    req.session.user = user;
+    res.render("auth/changePassword", {
+        pageTitle: "Change password",
+        path: "/changePassword",
+        message: errConfirmPass || passwordChangeSuccess,
+    });
+};
+
+const postChangePassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const { password, confPassword } = req.body;
+    if (password !== confPassword) {
+        req.flash("errConfirmPass", ["error"]);
+        return res.redirect(`/changePassword/${req.session?.user?.resetToken}`);
+    }
+    const hashPassword = await bcrypt.hash(password, Number(process.env.SALT));
+    await User.updateOne(
+        { email: req.session.user.email },
+        { password: hashPassword }
+    );
+    req.flash("passwordChangeSuccess", "Password has change successfuly!");
+    res.redirect(`/changePassword/${req.session?.user?.resetToken}`);
+};
 
 export default {
     getLogin,
@@ -112,4 +175,6 @@ export default {
     getConfirmSignup,
     getReset,
     postReset,
+    getChangePassword,
+    postChangePassword,
 };

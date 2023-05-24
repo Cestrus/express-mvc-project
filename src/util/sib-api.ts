@@ -91,8 +91,7 @@ const createConfirmHtml = (): emailContentType => {
 
 const createChangePassword = (token: string): emailContentType => {
     return {
-        htmlContent:
-            "<!DOCTYPE html><html><body><h1>Hello!</h1><p>Sombody try change your password!</p><p>For confirm click this <a href='http://localhost:3000'>link</a></body></html>",
-        subject: "My subject, asshole!",
+        htmlContent: `<!DOCTYPE html><html><body><h1>Hello!</h1><p>Sombody try change your password!</p><p>For confirm click this <a href="http://localhost:3000/changePassword/${token}">link</a></body></html>`,
+        subject: "Change password",
     };
 };

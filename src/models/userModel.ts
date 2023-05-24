@@ -24,7 +24,7 @@ const userSchema = new Schema({
         ],
     },
     resetToken: String,
-    ressetTokenExpiration: Date,
+    resetTokenExpiration: Date,
 });
 
 userSchema.methods.addToCart = async function (id: string) {

@@ -65,11 +65,5 @@ app.use(authRouter);
 app.use(errorController.get404);
 
 mongoose.connect(process.env.MONGO_URL, { dbName: "shop" }).then((result) => {
-    // const user = new User({
-    //     userName: "Alex",
-    //     email: "alex@mail.qw",
-    //     cart: { items: [] },
-    // });
-    // user.save();
     app.listen(3000);
 });
