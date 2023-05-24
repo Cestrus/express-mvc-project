@@ -17,7 +17,9 @@ const getLogin = (req: Request, res: Response, next: NextFunction) => {
 
 const postLogout = (req: Request, res: Response, next: NextFunction) => {
     req.session.destroy((err) => {
-        console.log(err);
+        if (err) {
+            console.log(err);
+        }
         res.redirect("/");
     });
 };
@@ -37,7 +39,9 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
     req.session.isLoggedIn = true;
     req.session.user = user;
     req.session.save((err) => {
-        console.log(err);
+        if (err) {
+            console.log(err);
+        }
         res.redirect("/");
     });
 };

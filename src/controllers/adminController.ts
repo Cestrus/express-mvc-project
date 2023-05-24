@@ -63,7 +63,7 @@ const postDeleteProduct = async (
 };
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.find();
+    const products = await Product.find({ userId: req.session.user._id });
     res.render("admin/products", {
         prods: products,
         pageTitle: "Admin Products",
