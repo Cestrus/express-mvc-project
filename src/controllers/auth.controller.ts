@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 
-import User from "../models/userModel";
-import PossibleUser from "../models/possibleUserModel";
+import User from "../models/user.model";
+import PossibleUser from "../models/possibleUser.model";
 import { sendEmail, ENVELOPE } from "../util/sib-api";
 import { getToken } from "../util/tokens";
 

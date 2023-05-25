@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Product from "../models/productModel";
+import Product from "../models/product.model";
 
 const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
     res.render("admin/edit-product", {

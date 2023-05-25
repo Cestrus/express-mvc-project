@@ -1,6 +1,5 @@
 import session from "express-session";
-import { IUser } from "../prodCart";
-import User from "../../models/userModel";
+import User from "../../models/user.model";
 
 declare module "express-session" {
     interface SessionData {

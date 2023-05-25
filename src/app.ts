@@ -8,11 +8,11 @@ import connectMongoDB from "connect-mongodb-session";
 import csrf from "csurf";
 import flash from "connect-flash";
 
-import User from "./models/userModel";
+import User from "./models/user.model";
 import adminRouter from "./routes/admin";
 import shopRouter from "./routes/shop";
 import authRouter from "./routes/auth";
-import errorController from "./controllers/errorController";
+import errorController from "./controllers/error.controller";
 
 dotenv.config();
 const app = express();
