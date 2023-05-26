@@ -7,21 +7,39 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-		<% if (messObj.message) { %>
-			<div class="user-message <% if(messObj.isError) { %> user-message--error <% } %>"><%= messObj.message %></div>
+		<% if (flashMsg.message) { %>
+			<div class="user-message <% if(flashMsg.isError) { %> user-message--error <% } %>"><%= flashMsg.message %></div>
 		<% } %>
         <form class="login-form" action="/signup" method="POST">
             <div class="form-control">
                 <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email">
+                <input 
+					type="email" 
+					name="email" 
+					id="email" 
+					value="<%= inputValues.email %>" 
+					class="<%= errorFields.find((err) => err === 'email') ? 'incorrect' : '' %>" 
+				>
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password">
+                <input 
+					type="password" 
+					name="password" 
+					id="password" 
+					value="<%= inputValues.password %>"
+					class="<%= errorFields.find((err) => err === 'password')? 'incorrect' : '' %>" 
+				>
             </div>
             <div class="form-control">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword">
+                <input 
+					type="password" 
+					name="confirmPassword" 
+					id="confirmPassword" 
+					value="<%= inputValues.confirmPassword %>"
+					class="<%= errorFields.find((err) => err === 'confirmPassword')? 'incorrect' : '' %>"
+				>
             </div>
 			<input type="hidden" value="<%= csrfToken %>" name="_csrf" />
             <button class="btn" type="submit">Signup</button>
