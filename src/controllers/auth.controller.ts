@@ -1,26 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
+import { FieldValidationError, validationResult } from "express-validator";
 
-import User from "../models/userModel";
-import PossibleUser from "../models/possibleUserModel";
+import User from "../models/user.model";
+import PossibleUser from "../models/possibleUser.model";
 import { sendEmail, ENVELOPE } from "../util/sib-api";
 import { getToken } from "../util/tokens";
 
 const getLogin = (req: Request, res: Response, next: NextFunction) => {
-    const message = req.flash("errorLogin")[0];
+    const [errorMsg] = req.flash("error");
+    const [successMsg] = req.flash("success");
     res.render("auth/login", {
         pageTitle: "Login Page",
         path: "/login",
-        errorMsg: message,
-    });
-};
-
-const postLogout = (req: Request, res: Response, next: NextFunction) => {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(err);
-        }
-        res.redirect("/");
+        flashMsg: { isError: !!errorMsg, message: errorMsg || successMsg },
     });
 };
 
@@ -28,12 +21,12 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) {
-        req.flash("errorLogin", "Incorrect email or password");
+        req.flash("error", ["Incorrect email or password"]);
         return res.redirect("/login");
     }
     const isValidPass = await bcrypt.compare(password, user.password);
     if (!isValidPass) {
-        req.flash("errorLogin", "Incorrect email or password");
+        req.flash("error", ["Incorrect email or password"]);
         return res.redirect("/login");
     }
     req.session.isLoggedIn = true;
@@ -46,21 +39,60 @@ const postLogin = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+const postLogout = (req: Request, res: Response, next: NextFunction) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.log(err);
+        }
+        res.redirect("/");
+    });
+};
+
 const getSignup = (req: Request, res: Response, next: NextFunction) => {
-    const [messErr, isError] = req.flash("signupError");
-    const [messConfirm] = req.flash("confirmSignup");
+    const [errorMsg] = req.flash("error");
+    const [successMsg] = req.flash("success");
+    const {
+        oldEmail = "",
+        oldPassword = "",
+        oldConfirmPassword = "",
+    } = req.session.oldInputValues ? req.session.oldInputValues : {};
+
+    const errorFields = req.session.validationErrorFields
+        ? req.session.validationErrorFields
+        : [];
     res.render("auth/signup", {
         pageTitle: "Signup Page",
         path: "/signup",
-        messObj: { isError, message: messErr || messConfirm },
+        flashMsg: { isError: !!errorMsg, message: errorMsg || successMsg },
+        inputValues: {
+            email: oldEmail,
+            password: oldPassword,
+            confirmPassword: oldConfirmPassword,
+        },
+        errorFields: errorFields || [],
     });
 };
 
 const postSignup = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password, confirmPassword } = req.body;
     const isExistUser = await User.findOne({ email: email });
+    const errors = validationResult(req).array() as FieldValidationError[];
+
+    if (errors.length) {
+        req.flash(
+            "error",
+            errors.map((err) => err.msg)
+        );
+        req.session.oldInputValues = {
+            oldEmail: email,
+            oldPassword: password,
+            oldConfirmPassword: confirmPassword,
+        };
+        req.session.validationErrorFields = errors.map((err) => err.path);
+        return res.status(422).redirect("/signup");
+    }
     if (isExistUser) {
-        req.flash("signupError", ["User exist already", "error"]);
+        req.flash("error", ["User exist already"]);
         return res.redirect("/signup");
     }
 
@@ -68,6 +100,7 @@ const postSignup = async (req: Request, res: Response, next: NextFunction) => {
     if (isExistPossibleUser) {
         await PossibleUser.deleteOne({ email: email });
     }
+
     const hashPassword = await bcrypt.hash(password, Number(process.env.SALT));
     const userToken = getToken();
     const possibleUser = new PossibleUser({
@@ -79,7 +112,9 @@ const postSignup = async (req: Request, res: Response, next: NextFunction) => {
     possibleUser.save();
 
     sendEmail(email, ENVELOPE.signUp, userToken);
-    req.flash("confirmSignup", "Check your mail for confirm sign up");
+    req.flash("success", ["Check your mail for confirm sign up"]);
+    req.session.oldInputValues = {};
+    req.session.validationErrorFields = [];
     res.redirect("/signup");
 };
 
@@ -99,15 +134,12 @@ const getConfirmSignup = async (
 };
 
 const getReset = async (req: Request, res: Response, next: NextFunction) => {
-    let [errorNotUser, errInvalidToken, isError] = req.flash("errorReset");
-    const [confirmEmail] = req.flash("confirmEmail");
+    let [errorMsg] = req.flash("error");
+    const [successMsg] = req.flash("success");
     res.render("auth/reset", {
         pageTitle: "Reset password",
         path: "/reset",
-        messObj: {
-            isError,
-            message: errorNotUser || errInvalidToken || confirmEmail,
-        },
+        flashMsg: { isError: !!errorMsg, message: errorMsg || successMsg },
     });
 };
 
@@ -115,14 +147,14 @@ const postReset = async (req: Request, res: Response, next: NextFunction) => {
     const { email } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) {
-        req.flash("errorReset", ["Not found e-mail", "", "error"]);
+        req.flash("error", ["Not found e-mail"]);
         return res.redirect("/reset");
     }
     const resetToken = getToken();
     user.resetToken = resetToken;
     user.resetTokenExpiration = new Date(Date.now() + 600000);
     user.save();
-    req.flash("confirmEmail", "Check your email and confirm reset password");
+    req.flash("success", ["Check your email and confirm reset password"]);
     sendEmail(email, ENVELOPE.changePass, resetToken);
     res.redirect("/reset");
 };
@@ -132,22 +164,35 @@ const getChangePassword = async (
     res: Response,
     next: NextFunction
 ) => {
-    const [errConfirmPass] = req.flash("errConfirmPass");
-    const [passwordChangeSuccess] = req.flash("passwordChangeSuccess");
+    const [errorMsg] = req.flash("error");
+    const [successMsg] = req.flash("success");
     const { resetToken } = req.params;
     const user = await User.findOne({
         resetToken: resetToken,
         resetTokenExpiration: { $gt: Date.now() },
     });
     if (!user) {
-        req.flash("errorReset", ["", "Invalid Token!", "error"]);
+        req.flash("error", ["Invalid Token!"]);
         return res.redirect("/reset");
     }
     req.session.user = user;
+    const { oldPassword = "", oldConfirmPassword = "" } = req.session
+        .oldInputValues
+        ? req.session.oldInputValues
+        : {};
+    const errorFields = req.session.validationErrorFields
+        ? req.session.validationErrorFields
+        : [];
+
     res.render("auth/changePassword", {
         pageTitle: "Change password",
         path: "/changePassword",
-        message: errConfirmPass || passwordChangeSuccess,
+        flashMsg: { isError: !!errorMsg, message: errorMsg || successMsg },
+        inputValues: {
+            password: oldPassword,
+            confirmPassword: oldConfirmPassword,
+        },
+        errorFields: errorFields || [],
     });
 };
 
@@ -156,17 +201,31 @@ const postChangePassword = async (
     res: Response,
     next: NextFunction
 ) => {
-    const { password, confPassword } = req.body;
-    if (password !== confPassword) {
-        req.flash("errConfirmPass", ["error"]);
-        return res.redirect(`/changePassword/${req.session?.user?.resetToken}`);
+    const { password, confirmPassword } = req.body;
+    const errors = validationResult(req).array() as FieldValidationError[];
+
+    if (errors.length) {
+        req.flash(
+            "error",
+            errors.map((err) => err.msg)
+        );
+        req.session.oldInputValues = {
+            oldPassword: password,
+            oldConfirmPassword: confirmPassword,
+        };
+        req.session.validationErrorFields = errors.map((err) => err.path);
+        return res
+            .status(422)
+            .redirect(`/changePassword/${req.session?.user?.resetToken}`);
     }
     const hashPassword = await bcrypt.hash(password, Number(process.env.SALT));
     await User.updateOne(
         { email: req.session.user.email },
         { password: hashPassword }
     );
-    req.flash("passwordChangeSuccess", "Password has change successfuly!");
+    req.flash("success", "Password has change successfuly!");
+    req.session.oldInputValues = {};
+    req.session.validationErrorFields = [];
     res.redirect(`/changePassword/${req.session?.user?.resetToken}`);
 };
 

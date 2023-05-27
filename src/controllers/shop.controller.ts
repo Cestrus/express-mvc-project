@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import Product from "../models/productModel";
-import Order from "../models/orderModel";
+import Product from "../models/product.model";
+import Order from "../models/order.model";
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
     const products = await Product.find();

@@ -7,28 +7,54 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
+		<% if (flashMsg.message) { %>
+			<div class="user-message <% if(flashMsg.isError) { %> user-message--error <% } %>"><%= flashMsg.message %></div>
+		<% } %>
         <form class="product-form" 
 				action="/admin/<% if(editing){ %>edit-product<% }else{ %>add-product<% } %>" 
 				method="POST"
 		>
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<% if(editing){ %><%= product.title %><% } %>" >
+                <input 
+					type="text" 
+					name="title" 
+					id="title" 
+					value="<% if(editing){ %><%= inputValues.title %><% } %>" 
+					class="<%= errorFields.find((err) => err === 'title') ? 'incorrect' : '' %>" 
+				>
             </div>
             <div class="form-control">
                 <label for="imageUrl">Image URL</label>
-                <input type="text" name="imageUrl" id="imageUrl" value="<% if(editing){ %><%= product.imageUrl %><% } %>">
+                <input 
+					type="text" 
+					name="imageUrl" 
+					id="imageUrl" 
+					value="<% if(editing){ %><%= inputValues.imageUrl %><% } %>"
+					class="<%= errorFields.find((err) => err === 'imageUrl') ? 'incorrect' : '' %>" 
+				>
             </div>
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<% if(editing){ %><%= product.price %><% } %>">
+                <input 
+					type="number" 
+					name="price" 
+					id="price" 
+					step="0.01" 
+					value="<% if(editing){ %><%= inputValues.price %><% } %>"
+					class="<%= errorFields.find((err) => err === 'price') ? 'incorrect' : '' %>" 
+				>
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea name="description" id="description" rows="5"><% if(editing){ %><%= product.description %><% } %></textarea>
+                <textarea 
+					name="description" 
+					id="description" 
+					rows="5"><% if(editing){ %><%= inputValues.description %><% } %>
+				</textarea>
             </div>
 			<% if(editing){ %>
-				<input type="hidden" name="id" value="<%= product._id %>">
+				<input type="hidden" name="id" value="<%= prodId._id %>">
 			<% } %>
             <button class="btn" type="submit"><% if (editing){ %> Update Product <% }else { %> Add product <% } %> </button>
 			<input type="hidden" value="<%= csrfToken %>" name="_csrf" />

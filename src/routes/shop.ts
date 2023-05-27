@@ -1,6 +1,6 @@
 import express from "express";
-import shopController from "../controllers/shopController";
-import { authGuard } from "../middleware/authGuard";
+import shopController from "../controllers/shop.controller";
+import { authGuard } from "../middleware/auth.guard";
 
 const shopRouter = express.Router();
 

@@ -17,11 +17,11 @@
     border-radius: 2px;
 }
 
-.form-control--error input {
-    border: 2px solid red;
-}
-
 .form-control input:focus,
 .form-control textarea:focus {
     outline-color: #00695c;
+}
+
+.form-control input.incorrect {
+    border-color: red;
 }
