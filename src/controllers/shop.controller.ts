@@ -44,21 +44,32 @@ const getCart = async (req: Request, res: Response, next: NextFunction) => {
 const postCart = async (req: Request, res: Response, next: NextFunction) => {
     const { remove } = req.query;
     const { productId, price } = req.body;
-    if (remove === "true") {
-        await req.user.removeProduct(productId);
-    } else {
-        await req.user.addToCart(productId);
+    try {
+        if (remove === "true") {
+            await req.user.removeProduct(productId);
+        } else {
+            await req.user.addToCart(productId);
+        }
+    } catch (err) {
+        const error = new Error(err);
+        next(error);
     }
     res.redirect("/cart");
 };
 
 const getOrders = async (req: Request, res: Response, next: NextFunction) => {
-    const orders = (await Order.find({ userId: req.session.user._id })) || [];
-    res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Orders",
-        orders,
-    });
+    try {
+        const orders =
+            (await Order.find({ userId: req.session.user._id })) || [];
+        res.render("shop/orders", {
+            path: "/orders",
+            pageTitle: "Orders",
+            orders,
+        });
+    } catch (err) {
+        const error = new Error(err);
+        next(error);
+    }
 };
 
 const postOrder = async (req: Request, res: Response, next: NextFunction) => {
@@ -66,7 +77,12 @@ const postOrder = async (req: Request, res: Response, next: NextFunction) => {
         userId: req.session.user._id,
         products: [...req.session.user.cart.items],
     });
-    order.save();
+    try {
+        order.save();
+    } catch (err) {
+        const error = new Error(err);
+        next(error);
+    }
     req.user.clearCart();
     res.redirect("/orders");
 };

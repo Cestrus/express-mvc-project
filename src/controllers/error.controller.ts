@@ -9,6 +9,16 @@ const get404 = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
+const get500 = (req: Request, res: Response, next: NextFunction) => {
+    const isLoggedIn = req.session.isLoggedIn;
+    res.status(500).render("500", {
+        pageTitle: "Error",
+        path: "error500",
+        isAuthenticated: isLoggedIn,
+    });
+};
+
 export default {
     get404,
+    get500,
 };

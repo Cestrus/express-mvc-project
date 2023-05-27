@@ -44,7 +44,6 @@ const getEditProduct = async (
         oldImageUrl = "",
         oldDescription = "",
     } = req.session.oldInputValues ? req.session.oldInputValues : {};
-    console.log(" get ==> ", oldTitle, oldPrice, oldImageUrl, oldDescription);
     const errorFields = req.session.validationErrorFields
         ? req.session.validationErrorFields
         : [];
@@ -77,7 +76,6 @@ const postAddProduct = async (
     next: NextFunction
 ) => {
     const { id, title, price, imageUrl, description } = req.body;
-    console.log("post ==> ", title, price, imageUrl, description);
     const errors = validationResult(req).array() as FieldValidationError[];
 
     if (errors.length) {
@@ -97,10 +95,15 @@ const postAddProduct = async (
             .redirect(`/admin/edit-product/${id}?editMode=true`);
     }
     if (id) {
-        await Product.updateOne(
-            { _id: id },
-            { title, price: Number(price), imageUrl, description }
-        );
+        try {
+            await Product.updateOne(
+                { _id: id },
+                { title, price: Number(price), imageUrl, description }
+            );
+        } catch (err) {
+            const error = new Error(err);
+            return next(error);
+        }
     } else {
         const product = new Product({
             userId: req.session.user._id,
@@ -109,7 +112,12 @@ const postAddProduct = async (
             description,
             imageUrl,
         });
-        await product.save();
+        try {
+            await product.save();
+        } catch (err) {
+            const error = new Error(err);
+            return next(error);
+        }
     }
     req.session.oldInputValues = {};
     req.session.validationErrorFields = [];
@@ -122,7 +130,12 @@ const postDeleteProduct = async (
     next: NextFunction
 ) => {
     const { id, price } = req.body;
-    await Product.deleteOne({ _id: id });
+    try {
+        await Product.deleteOne({ _id: id });
+    } catch (err) {
+        const error = new Error(err);
+        return next(error);
+    }
     res.redirect("/admin/products");
 };
 
