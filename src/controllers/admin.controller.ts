@@ -15,7 +15,6 @@ const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
     const errorFields = req.session.validationErrorFields
         ? req.session.validationErrorFields
         : [];
-
     res.render("admin/edit-product", {
         pageTitle: "Add Product",
         path: "/admin/add-product",
@@ -75,24 +74,33 @@ const postAddProduct = async (
     res: Response,
     next: NextFunction
 ) => {
-    const { id, title, price, imageUrl, description } = req.body;
+    const image = req.file;
+    const imageUrl = image ? `/${image.path}` : "";
+    const { id, title, price, description } = req.body;
     const errors = validationResult(req).array() as FieldValidationError[];
-
-    if (errors.length) {
-        req.flash(
-            "error",
-            errors.map((err) => err.msg)
-        );
+    if (errors.length || !image) {
+        if (!image) {
+            req.flash(
+                "error",
+                "Invalid file type. File should be png, jpeg or jpg format"
+            );
+        } else {
+            req.flash(
+                "error",
+                errors.map((err) => err.msg)
+            );
+            req.session.validationErrorFields = errors.map((err) => err.path);
+        }
         req.session.oldInputValues = {
             oldTitle: title,
             oldPrice: price,
             oldImageUrl: imageUrl,
             oldDescription: description,
         };
-        req.session.validationErrorFields = errors.map((err) => err.path);
-        return res
-            .status(422)
-            .redirect(`/admin/edit-product/${id}?editMode=true`);
+        const returnUrl = id
+            ? `/admin/edit-product/${id}?editMode=true`
+            : `/admin/add-product`;
+        return res.status(422).redirect(returnUrl);
     }
     if (id) {
         try {
@@ -105,14 +113,14 @@ const postAddProduct = async (
             return next(error);
         }
     } else {
-        const product = new Product({
-            userId: req.session.user._id,
-            title,
-            price: Number(price),
-            description,
-            imageUrl,
-        });
         try {
+            const product = new Product({
+                userId: req.session.user._id,
+                title,
+                price: Number(price),
+                description,
+                imageUrl,
+            });
             await product.save();
         } catch (err) {
             const error = new Error(err);

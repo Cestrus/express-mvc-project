@@ -12,7 +12,6 @@ adminRouter.get("/add-product", authGuard, adminController.getAddProduct);
 adminRouter.post(
     "/add-product",
     authGuard,
-    validGuard.checkURL("imageUrl"),
     validGuard.checkNumeric("price"),
     validGuard.checkText("title"),
     validGuard.checkText("description"),
@@ -23,7 +22,6 @@ adminRouter.post(
 adminRouter.post(
     "/edit-product/",
     authGuard,
-    validGuard.checkURL("imageUrl"),
     validGuard.checkNumeric("price"),
     validGuard.checkText("title"),
     validGuard.checkText("description"),
