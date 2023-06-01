@@ -135,21 +135,22 @@ const postAddProduct = async (
     res.redirect("/admin/products");
 };
 
-const postDeleteProduct = async (
+const deleteProduct = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    const { id, price } = req.body;
+    const { prodId } = req.params;
     try {
-        const prod = await Product.findById(id, "imageUrl");
-        await Product.deleteOne({ _id: id });
+        const prod = await Product.findById(prodId, "imageUrl");
+        await Product.deleteOne({ _id: prodId });
         deleteFile(prod.imageUrl);
+        res.status(200).json({ message: "delete success" });
     } catch (err) {
-        const error = new Error(err);
-        return next(error);
+        res.status(500).json({
+            message: "delete product operation was faild!",
+        });
     }
-    res.redirect("/admin/products");
 };
 
 const getProducts = async (req: Request, res: Response, next: NextFunction) => {
@@ -166,5 +167,5 @@ export default {
     postAddProduct,
     getEditProduct,
     getProducts,
-    postDeleteProduct,
+    deleteProduct,
 };

@@ -31,10 +31,10 @@ adminRouter.post(
 // // /admin/edit-product => GET
 adminRouter.get("/edit-product/:id", authGuard, adminController.getEditProduct);
 
-adminRouter.post(
-    "/delete-product",
+adminRouter.delete(
+    "/product/:prodId",
     authGuard,
-    adminController.postDeleteProduct
+    adminController.deleteProduct
 );
 
 // /admin/products => GET
