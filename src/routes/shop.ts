@@ -18,6 +18,8 @@ shopRouter.post("/cart/remove-product", authGuard, shopController.postCart);
 
 shopRouter.get("/orders", authGuard, shopController.getOrders);
 
+shopRouter.get("/orders/:orderId", authGuard, shopController.getInvoice);
+
 shopRouter.post("/order-items", authGuard, shopController.postOrder);
 
 // shopRouter.get("/checkout", shopController.getCheckout);

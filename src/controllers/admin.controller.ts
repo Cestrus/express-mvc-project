@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { FieldValidationError, validationResult } from "express-validator";
 
+import { deleteFile } from "../util/deleteFile";
 import Product from "../models/product.model";
 
 const getAddProduct = (req: Request, res: Response, next: NextFunction) => {
@@ -53,6 +54,9 @@ const getEditProduct = async (
     if (!editMode || !product) {
         return res.redirect("/");
     }
+    if (product.imageUrl) {
+        deleteFile(product.imageUrl);
+    }
     res.render("admin/edit-product", {
         pageTitle: "Edit Product",
         path: "/admin/add-product",
@@ -62,7 +66,6 @@ const getEditProduct = async (
         inputValues: {
             title: oldTitle || product.title,
             price: oldPrice || product.price,
-            imageUrl: oldImageUrl || product.imageUrl,
             description: oldDescription || product.description,
         },
         errorFields: errorFields || [],
@@ -75,8 +78,8 @@ const postAddProduct = async (
     next: NextFunction
 ) => {
     const image = req.file;
-    const imageUrl = image ? `/${image.path}` : "";
     const { id, title, price, description } = req.body;
+    const imageUrl = image ? `/${image.path}` : "";
     const errors = validationResult(req).array() as FieldValidationError[];
     if (errors.length || !image) {
         if (!image) {
@@ -139,7 +142,9 @@ const postDeleteProduct = async (
 ) => {
     const { id, price } = req.body;
     try {
+        const prod = await Product.findById(id, "imageUrl");
         await Product.deleteOne({ _id: id });
+        deleteFile(prod.imageUrl);
     } catch (err) {
         const error = new Error(err);
         return next(error);

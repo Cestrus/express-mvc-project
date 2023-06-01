@@ -8,13 +8,20 @@
 			<% if(orders.length > 0) {%>
 				<ul class="orders">
 					<% for (let order of orders){ %>
-						<li class="orders__item">
-							<h1>Order # - <%= order._id%> </h2>
-							<ul class="orders__products">
-								<% for (let prod of order.products){ %>
-									<li class="orders__products-item"><%= prod.id%> (<%= prod.quantity%>)</li>
-								<% } %>
-							</ul>
+						<li class="orders__item orders__products-container">
+							<div class="">
+								<h1>Order # - <%= order._id%> </h2>
+								<ul class="orders__products">
+									<% for (let prod of order.products){ %>
+										<li class="orders__products-item">
+											<%= prod.productId.title%> ($<%= prod.productId.price %>  *  <%= prod.quantity %>) 
+										</li>
+									<% } %>
+								</ul>
+							</div>
+							<div class="orders__products-invoice-wrap">
+								<a href="/orders/<%= order._id%>">invoice</a>
+							</div>
 						</li>
 					<% } %>
 				</ul>

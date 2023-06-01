@@ -27,3 +27,13 @@
     border: 1px solid #00695c;
     color: #00695c;
 }
+
+.orders__products-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.orders__products-invoice-wrap {
+    display: flex;
+    align-items: center;
+}
